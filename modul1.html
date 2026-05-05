@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DrohnenSchein.app — Modul 1: Sicherheit</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--sky:#0066CC;--sky-light:#E8F4FF;--sky-dark:#004499;--yellow:#FFD600;--green:#00C853;--red:#FF3D00;--black:#0D0D0D;--white:#FAFAF8;--gray:#F2F2EF;--text:#1A1A1A;--muted:#777;--border:#E0E0DC}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);overflow-x:hidden}
+.app-header{background:var(--sky-dark);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-logo{font-family:'Syne',sans-serif;font-size:16px;color:#fff;font-weight:800;letter-spacing:-0.02em}
+.app-logo span{color:var(--yellow)}
+.progress-wrap{display:flex;align-items:center;gap:10px}
+.progress-bar{width:120px;height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--yellow);border-radius:3px;transition:width 0.4s ease;width:0%}
+.progress-label{font-size:12px;color:rgba(255,255,255,0.7)}
+.module-hero{background:linear-gradient(135deg,var(--sky-dark) 0%,var(--sky) 100%);padding:2.5rem 1.25rem 3rem;position:relative;overflow:hidden}
+.module-hero::after{content:'';position:absolute;bottom:-30px;left:0;right:0;height:60px;background:var(--white);border-radius:40px 40px 0 0}
+.module-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);color:#fff;font-size:12px;font-weight:500;padding:4px 12px;border-radius:20px;margin-bottom:1rem;letter-spacing:0.05em}
+.module-hero h1{font-family:'Syne',sans-serif;font-size:clamp(28px,6vw,42px);font-weight:800;color:#fff;line-height:1.1;margin-bottom:0.75rem}
+.module-hero p{font-size:15px;color:rgba(255,255,255,0.75);line-height:1.6;max-width:480px;margin-bottom:1.5rem}
+.module-meta{display:flex;gap:1.5rem;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,0.8)}
+.content{max-width:680px;margin:0 auto;padding:2rem 1.25rem}
+.lesson-card{background:#fff;border:1px solid var(--border);border-radius:16px;margin-bottom:1.5rem;overflow:hidden;transition:box-shadow 0.2s}
+.lesson-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.06)}
+.card-header{padding:1.25rem 1.5rem;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.card-num{width:32px;height:32px;background:var(--sky-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--sky-dark);flex-shrink:0}
+.card-title{font-size:16px;font-weight:500;flex:1}
+.card-toggle{font-size:20px;color:var(--muted);transition:transform 0.3s}
+.card-toggle.open{transform:rotate(180deg)}
+.card-body{padding:0 1.5rem;max-height:0;overflow:hidden;transition:max-height 0.4s ease,padding 0.3s}
+.card-body.open{padding:1.5rem;max-height:2000px}
+.lesson-text{font-size:15px;line-height:1.75;color:#333;margin-bottom:1.25rem}
+.lesson-text strong{color:var(--sky-dark);font-weight:500}
+.highlight-box{border-radius:10px;padding:1rem 1.25rem;margin:1rem 0;display:flex;gap:12px;align-items:flex-start}
+.highlight-box.info{background:var(--sky-light);border-left:3px solid var(--sky)}
+.highlight-box.warning{background:#FFF8E1;border-left:3px solid var(--yellow)}
+.highlight-box.danger{background:#FFF0EB;border-left:3px solid var(--red)}
+.highlight-box.success{background:#E8F5E9;border-left:3px solid var(--green)}
+.box-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.box-text{font-size:14px;line-height:1.6;color:#333}
+.box-text strong{font-weight:600}
+.scenario{background:var(--gray);border-radius:12px;overflow:hidden;margin:1.25rem 0}
+.scenario-visual{width:100%;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:1rem;min-height:180px}
+.scenario-question{padding:1rem 1.25rem;font-size:15px;font-weight:500;color:var(--text)}
+.scenario-opts{display:flex;flex-direction:column;gap:6px;padding:0 1.25rem 1.25rem}
+.scenario-opt{background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;cursor:pointer;transition:all 0.15s;text-align:left;display:flex;align-items:center;gap:10px;color:var(--text);width:100%}
+.scenario-opt:hover{border-color:var(--sky);background:var(--sky-light)}
+.scenario-opt.correct{border-color:var(--green);background:#E8F5E9;color:#1B5E20}
+.scenario-opt.wrong{border-color:var(--red);background:#FFF0EB;color:#BF360C}
+.scenario-feedback{padding:0 1.25rem 1.25rem;font-size:14px;line-height:1.6;display:none}
+.scenario-feedback.show{display:block}
+.scenario-feedback.correct{color:#2E7D32}
+.scenario-feedback.wrong{color:#C62828}
+.rules-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:1rem 0}
+.rule-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:0.75rem;text-align:center;overflow:hidden;min-width:0}
+.rule-icon{font-size:24px;margin-bottom:6px}
+.rule-num{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--sky-dark);line-height:1;margin-bottom:4px;word-break:break-word}
+.rule-label{font-size:11px;color:var(--muted);line-height:1.4}
+.quiz-section{background:var(--sky-dark);border-radius:16px;padding:1.75rem;margin-top:2rem;color:#fff}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.quiz-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.quiz-count{font-size:13px;color:rgba(255,255,255,0.6)}
+.quiz-q{font-size:16px;font-weight:500;line-height:1.5;margin-bottom:1.25rem}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.quiz-opt{background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 16px;font-size:15px;cursor:pointer;transition:all 0.15s;text-align:left;color:#fff;width:100%;display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif}
+.quiz-opt:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
+.quiz-opt.correct{background:rgba(0,200,83,0.2);border-color:var(--green)}
+.quiz-opt.wrong{background:rgba(255,61,0,0.2);border-color:var(--red)}
+.quiz-opt.disabled{pointer-events:none}
+.opt-letter{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.quiz-feedback{font-size:14px;line-height:1.6;padding:10px 14px;border-radius:8px;margin-bottom:1rem;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.correct{background:rgba(0,200,83,0.15);color:#A5D6A7}
+.quiz-feedback.wrong{background:rgba(255,61,0,0.15);color:#FFAB91}
+.quiz-nav{display:flex;align-items:center;justify-content:space-between;margin-top:1rem}
+.btn-next{background:var(--yellow);color:var(--black);border:none;padding:10px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;display:none}
+.btn-next.show{display:block}
+.btn-next:hover{background:#E6C200;transform:translateY(-1px)}
+.quiz-dots{display:flex;gap:6px;margin-bottom:1.25rem}
+.quiz-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:background 0.3s}
+.quiz-dot.done{background:var(--green)}
+.quiz-dot.wrong-dot{background:var(--red)}
+.quiz-dot.active{background:var(--yellow)}
+.quiz-result{text-align:center;padding:1rem 0;display:none}
+.quiz-result.show{display:block}
+.result-score{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;color:var(--yellow);line-height:1;margin-bottom:0.5rem}
+.result-label{font-size:16px;color:rgba(255,255,255,0.8);margin-bottom:1.5rem}
+.btn-retry{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);color:#fff;padding:10px 24px;border-radius:8px;font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;margin-right:8px}
+.btn-retry:hover{background:rgba(255,255,255,0.2)}
+.btn-next-module{background:var(--yellow);color:var(--black);border:none;padding:10px 24px;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+.btn-next-module:hover{background:#E6C200}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">Drohnen<span>Schein</span>.app</div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0%</span>
+  </div>
+</header>
+
+<div class="module-hero">
+  <div class="module-tag">📚 Modul 1 von 9</div>
+  <h1>Sicherheit beim<br>Drohnenflug</h1>
+  <p>Grundsätze sicheren Fliegens, Risikobewusstsein und richtiges Verhalten — die Basis für alles Weitere.</p>
+  <div class="module-meta">
+    <div class="meta-item">⏱️ ca. 45 Minuten</div>
+    <div class="meta-item">📝 3 Lektionen</div>
+    <div class="meta-item">🎯 5 Prüfungsfragen</div>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="lesson-card" id="card1">
+    <div class="card-header" onclick="toggleCard(1)">
+      <div class="card-num">1</div>
+      <div class="card-title">Grundsätze sicheren Fliegens</div>
+      <div class="card-toggle" id="toggle1">▾</div>
+    </div>
+    <div class="card-body" id="body1">
+      <p class="lesson-text">Als Fernpilot trägst du die <strong>volle Verantwortung</strong> für die sichere Durchführung deines Fluges. Du musst vor jedem Flug aktiv entscheiden, ob die Bedingungen sicher sind — und im Zweifel lieber am Boden bleiben.</p>
+      <div class="highlight-box warning">
+        <span class="box-icon">⚠️</span>
+        <div class="box-text"><strong>Wichtig:</strong> "Ich wusste nicht, dass das verboten ist" ist vor dem LBA keine Entschuldigung. Unwissenheit schützt nicht vor Bußgeld.</div>
+      </div>
+      <div class="rules-grid">
+        <div class="rule-card"><div class="rule-icon">👁️</div><div class="rule-num">VLOS</div><div class="rule-label">Sichtverbindung immer halten</div></div>
+        <div class="rule-card"><div class="rule-icon">🛫</div><div class="rule-num">120m</div><div class="rule-label">Max. Flughöhe über Boden</div></div>
+        <div class="rule-card"><div class="rule-icon">🚁</div><div class="rule-num">Vorrang</div><div class="rule-label">Bemannte Luftfahrt immer zuerst</div></div>
+        <div class="rule-card"><div class="rule-icon">🔋</div><div class="rule-num">Reserve</div><div class="rule-label">Immer Akku-Rückkehr einplanen</div></div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-visual">
+          <svg viewBox="0 0 340 160" width="100%" style="max-width:340px">
+            <rect width="340" height="160" fill="#E3F2FD" rx="8"/>
+            <ellipse cx="60" cy="30" rx="35" ry="18" fill="white" opacity="0.9"/>
+            <ellipse cx="85" cy="25" rx="28" ry="15" fill="white" opacity="0.9"/>
+            <rect y="120" width="340" height="40" fill="#A5D6A7"/>
+            <rect y="118" width="340" height="5" fill="#66BB6A"/>
+            <rect x="20" y="95" width="8" height="28" fill="#5D4037"/>
+            <ellipse cx="24" cy="90" rx="18" ry="22" fill="#2E7D32"/>
+            <rect x="305" y="100" width="8" height="22" fill="#5D4037"/>
+            <ellipse cx="309" cy="96" rx="15" ry="18" fill="#2E7D32"/>
+            <g transform="translate(160,38)">
+              <rect x="-18" y="-5" width="36" height="10" fill="#0066CC" rx="4"/>
+              <circle cx="-16" cy="-7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+              <circle cx="16" cy="-7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+              <circle cx="-16" cy="7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+              <circle cx="16" cy="7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+            </g>
+            <line x1="180" y1="48" x2="180" y2="118" stroke="#FF6D00" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="186" y="86" font-size="11" fill="#FF6D00" font-family="sans-serif">120m</text>
+            <g transform="translate(278,52)" opacity="0.65">
+              <ellipse cx="0" cy="0" rx="22" ry="8" fill="#78909C"/>
+              <rect x="-26" y="-3" width="52" height="2" fill="#455A64" rx="1"/>
+              <rect x="16" y="-9" width="2" height="12" fill="#455A64"/>
+              <ellipse cx="17" cy="-10" rx="6" ry="2" fill="#B0BEC5"/>
+            </g>
+            <text x="238" y="44" font-size="10" fill="#C62828" font-family="sans-serif" font-weight="bold">⚠ Hubschrauber!</text>
+          </svg>
+        </div>
+        <div class="scenario-question">🚁 Situation: Du fliegst auf 80m Höhe. Plötzlich siehst du in der Ferne einen Hubschrauber. Was machst du?</div>
+        <div class="scenario-opts">
+          <button class="scenario-opt" onclick="answerScenario(this,'wrong','s1')">A — Weiterfliegen, ich bin unter 120m</button>
+          <button class="scenario-opt" onclick="answerScenario(this,'correct','s1')">B — Sofort landen oder Höhe reduzieren und ausweichen</button>
+          <button class="scenario-opt" onclick="answerScenario(this,'wrong','s1')">C — Höher steigen um besser gesehen zu werden</button>
+        </div>
+        <div class="scenario-feedback" id="fb-s1"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lesson-card" id="card2">
+    <div class="card-header" onclick="toggleCard(2)">
+      <div class="card-num">2</div>
+      <div class="card-title">Risikobewusstsein & Vorflugcheck</div>
+      <div class="card-toggle" id="toggle2">▾</div>
+    </div>
+    <div class="card-body" id="body2">
+      <p class="lesson-text">Bevor du startest, musst du aktiv prüfen ob der Flug sicher ist. Die <strong>Vorflugvorbereitung</strong> ist Pflicht, nicht optional.</p>
+      <div class="highlight-box info">
+        <span class="box-icon">📋</span>
+        <div class="box-text"><strong>Vorflugcheck — immer prüfen:</strong><br>1. Wetter: Wind, Sicht, Regen?<br>2. Akku: Voll geladen, keine Schäden?<br>3. Geo-Zonen: Darf ich hier fliegen?<br>4. Umgebung: Menschen, Hindernisse, Stromleitungen?<br>5. Versicherung: Gültig?</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-visual">
+          <svg viewBox="0 0 340 160" width="100%" style="max-width:340px">
+            <rect width="340" height="160" fill="#CFD8DC" rx="8"/>
+            <ellipse cx="80" cy="25" rx="60" ry="22" fill="#90A4AE"/>
+            <ellipse cx="200" cy="20" rx="70" ry="20" fill="#78909C"/>
+            <ellipse cx="300" cy="30" rx="50" ry="18" fill="#90A4AE"/>
+            <line x1="60" y1="50" x2="50" y2="70" stroke="#455A64" stroke-width="1.5" opacity="0.7"/>
+            <line x1="90" y1="48" x2="80" y2="68" stroke="#455A64" stroke-width="1.5" opacity="0.7"/>
+            <line x1="180" y1="44" x2="170" y2="64" stroke="#455A64" stroke-width="1.5" opacity="0.7"/>
+            <line x1="210" y1="44" x2="200" y2="64" stroke="#455A64" stroke-width="1.5" opacity="0.7"/>
+            <text x="240" y="78" font-size="26" fill="#546E7A" opacity="0.8">💨</text>
+            <rect y="120" width="340" height="40" fill="#8D6E63"/>
+            <g transform="translate(70,95)">
+              <circle cx="0" cy="-20" r="8" fill="#FF8A65"/>
+              <rect x="-6" y="-12" width="12" height="20" fill="#5C6BC0" rx="3"/>
+              <text x="18" y="-8" font-size="20">🤔</text>
+            </g>
+            <g transform="translate(180,112)" opacity="0.4">
+              <rect x="-14" y="-4" width="28" height="8" fill="#0066CC" rx="3"/>
+              <circle cx="-12" cy="-6" r="4" fill="#333"/>
+              <circle cx="12" cy="-6" r="4" fill="#333"/>
+            </g>
+            <text x="210" y="108" font-size="26">⛔</text>
+            <text x="202" y="128" font-size="10" fill="#C62828" font-family="sans-serif" font-weight="bold">NICHT FLIEGEN</text>
+          </svg>
+        </div>
+        <div class="scenario-question">🌧️ Situation: Es regnet leicht, Wind bei 45 km/h. Deine Drohne ist bis 38 km/h zugelassen. Was tust du?</div>
+        <div class="scenario-opts">
+          <button class="scenario-opt" onclick="answerScenario(this,'wrong','s2')">A — Kurz testen, vielleicht hält sie mehr aus</button>
+          <button class="scenario-opt" onclick="answerScenario(this,'wrong','s2')">B — Fliegen, es regnet ja nur leicht</button>
+          <button class="scenario-opt" onclick="answerScenario(this,'correct','s2')">C — Nicht fliegen — Wind überschreitet Limit, Regen gefährdet Elektronik</button>
+        </div>
+        <div class="scenario-feedback" id="fb-s2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lesson-card" id="card3">
+    <div class="card-header" onclick="toggleCard(3)">
+      <div class="card-num">3</div>
+      <div class="card-title">Notfallverhalten & häufige Fehler</div>
+      <div class="card-toggle" id="toggle3">▾</div>
+    </div>
+    <div class="card-body" id="body3">
+      <p class="lesson-text">Auch erfahrene Piloten erleben Notfälle. Der Unterschied liegt darin, <strong>wie schnell und richtig reagiert wird</strong>.</p>
+      <div class="highlight-box danger">
+        <span class="box-icon">🚨</span>
+        <div class="box-text"><strong>Häufigste Absturzursachen:</strong><br>• Akku zu weit entladen (unter 15% weiterfliegen)<br>• Orientierung verloren — nicht mehr wissen wo "vorne" ist<br>• GPS-Signal verloren, keine manuelle Kontrolle<br>• In No-Fly-Zone geflogen, Drohne landet automatisch</div>
+      </div>
+      <div class="highlight-box success">
+        <span class="box-icon">✅</span>
+        <div class="box-text"><strong>Bei Kontrollverlust — richtige Reaktion:</strong><br>1. Ruhe bewahren<br>2. Return-to-Home aktivieren (falls GPS vorhanden)<br>3. Manuelle Landung an sicherem Ort<br>4. Absturz melden wenn Menschen/Sachwerte betroffen</div>
+      </div>
+      <div class="scenario">
+        <div class="scenario-visual">
+          <svg viewBox="0 0 340 160" width="100%" style="max-width:340px">
+            <rect width="340" height="160" fill="#E8F5E9" rx="8"/>
+            <rect y="110" width="340" height="50" fill="#A5D6A7"/>
+            <rect y="108" width="340" height="5" fill="#66BB6A"/>
+            <g transform="translate(170,58)">
+              <rect x="-18" y="-5" width="36" height="10" fill="#0066CC" rx="4"/>
+              <circle cx="-16" cy="-7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+              <circle cx="16" cy="-7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+              <circle cx="-16" cy="7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+              <circle cx="16" cy="7" r="5" fill="#222" stroke="#555" stroke-width="1"/>
+            </g>
+            <rect x="150" y="24" width="40" height="18" fill="white" rx="4" stroke="#FF3D00" stroke-width="1.5"/>
+            <rect x="190" y="30" width="4" height="6" fill="#FF3D00" rx="1"/>
+            <rect x="153" y="27" width="9" height="12" fill="#FF3D00" rx="2"/>
+            <text x="164" y="38" font-size="10" fill="#FF3D00" font-family="sans-serif" font-weight="bold">12%</text>
+            <g transform="translate(38,95)">
+              <circle cx="0" cy="-15" r="7" fill="#FF8A65"/>
+              <rect x="-5" y="-8" width="10" height="16" fill="#42A5F5" rx="2"/>
+            </g>
+            <line x1="52" y1="90" x2="152" y2="76" stroke="#FF6D00" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="78" y="74" font-size="10" fill="#FF6D00" font-family="sans-serif">~300m entfernt</text>
+          </svg>
+        </div>
+        <div class="scenario-question">🔋 Situation: Du fliegst 300m entfernt, Akku zeigt 12%. RTH meldet: Akku reicht möglicherweise nicht für Rückkehr. Was tust du?</div>
+        <div class="scenario-opts">
+          <button class="scenario-opt" onclick="answerScenario(this,'wrong','s3')">A — Schnell noch ein paar Fotos und dann zurück</button>
+          <button class="scenario-opt" onclick="answerScenario(this,'correct','s3')">B — Sofort RTH aktivieren oder manuell umkehren</button>
+          <button class="scenario-opt" onclick="answerScenario(this,'wrong','s3')">C — Warten — die Drohne landet automatisch sicher</button>
+        </div>
+        <div class="scenario-feedback" id="fb-s3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-section">
+    <div id="quizMain">
+      <div class="quiz-header">
+        <div class="quiz-title">🎯 Modul-Quiz</div>
+        <div class="quiz-count" id="qCount">Frage 1 von 5</div>
+      </div>
+      <div class="quiz-dots" id="quizDots"></div>
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-opts" id="quizOpts"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-nav">
+        <div></div>
+        <button class="btn-next" id="btnNext" onclick="nextQuestion()">Weiter →</button>
+      </div>
+    </div>
+    <div class="quiz-result" id="quizResult">
+      <div class="result-score" id="resultScore"></div>
+      <div class="result-label" id="resultLabel"></div>
+      <br><br>
+      <button class="btn-retry" onclick="restartQuiz()">↺ Wiederholen</button>
+      <button class="btn-next-module">Modul 2 → Luftrecht</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const scenarioFeedback={
+  s1:{correct:'✅ Richtig! Bemannte Luftfahrt hat immer absoluten Vorrang — egal auf welcher Höhe du bist. Sofort ausweichen oder landen.',wrong:'❌ Falsch. Bemannte Luftfahrt hat immer Vorrang. Bei Sichtkontakt musst du sofort ausweichen oder landen.'},
+  s2:{correct:'✅ Richtig! Wind über dem Herstellerlimit ist ein klares No-Go. Regen gefährdet die Elektronik. Sicherheit geht vor.',wrong:'❌ Falsch. Wenn der Wind das Drohnenlimit überschreitet, darfst du nicht fliegen. Das ist Pflicht, keine Ermessensfrage.'},
+  s3:{correct:'✅ Richtig! Bei 12% Akku und 300m Entfernung ist sofortiges Umkehren Pflicht. Jede Sekunde zählt.',wrong:'❌ Falsch. Die automatische Notlandung wählt keinen sicheren Ort. Sofort manuell umkehren!'}
+};
+
+function toggleCard(n){
+  const body=document.getElementById('body'+n);
+  const toggle=document.getElementById('toggle'+n);
+  const open=body.classList.toggle('open');
+  toggle.classList.toggle('open',open);
+  updateProgress();
+}
+
+function answerScenario(btn,type,id){
+  btn.closest('.scenario').querySelectorAll('.scenario-opt').forEach(o=>{o.disabled=true;o.style.cursor='default'});
+  btn.classList.add(type);
+  const fb=document.getElementById('fb-'+id);
+  fb.textContent=scenarioFeedback[id][type];
+  fb.className='scenario-feedback show '+type;
+  updateProgress();
+}
+
+const questions=[
+  {q:'Was bedeutet VLOS beim Drohnenflug?',opts:['Visual Line of Sight — Drohne immer sehen','Very Low Operation System — Flug unter 30m','Verified Landing on Safe Spots','Visual Limit of Speed'],correct:0,fb:'VLOS = Visual Line of Sight. Du musst deine Drohne jederzeit mit bloßem Auge sehen — Kamera oder Fernglas zählen nicht.'},
+  {q:'Wie hoch darf eine Drohne in der offenen Kategorie maximal fliegen?',opts:['50 Meter','100 Meter','120 Meter','200 Meter'],correct:2,fb:'Die Maximalhöhe in der offenen Kategorie beträgt 120 Meter über dem Boden. In manchen Gebieten gelten noch niedrigere Beschränkungen.'},
+  {q:'Welche Luftfahrt hat immer Vorrang vor deiner Drohne?',opts:['Nur Flugzeuge über 5,7 Tonnen','Alle bemannten Luftfahrzeuge — immer','Nur Hubschrauber bei Rettungseinsätzen','Drohnen die höher fliegen'],correct:1,fb:'Alle bemannten Luftfahrzeuge haben immer absoluten Vorrang — Flugzeuge, Hubschrauber, Segelflugzeuge, Ballons. Du musst ausweichen.'},
+  {q:'Bei welchem Akkustand solltest du spätestens umkehren?',opts:['Unter 5%','Unter 10%','25-30% je nach Entfernung','Erst beim Low-Battery-Warning'],correct:2,fb:'Plane immer eine Rückkehr-Reserve ein. Bei 25-30% umkehren — je weiter entfernt, desto früher. Das Low-Battery-Warning ist oft zu spät.'},
+  {q:'Was ist bei einem Absturz mit Personenschaden zu tun?',opts:['Drohne einsammeln und weggehen','Erste Hilfe, Polizei, Vorfall melden','Nur die Versicherung anrufen','Keine Meldepflicht bei Drohnen'],correct:1,fb:'Erste Hilfe leisten, Notruf (112), Polizei. Schwere Unfälle müssen der Luftfahrtbehörde gemeldet werden. Versicherung informieren.'}
+];
+
+let cur=0,score=0,answers=[];
+
+function initQuiz(){
+  document.getElementById('quizDots').innerHTML=questions.map((_,i)=>`<div class="quiz-dot ${i===0?'active':''}" id="qd${i}"></div>`).join('');
+  showQ();
+}
+
+function showQ(){
+  const q=questions[cur];
+  document.getElementById('qCount').textContent=`Frage ${cur+1} von ${questions.length}`;
+  document.getElementById('quizQ').textContent=q.q;
+  document.getElementById('quizOpts').innerHTML=q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQ(this,${i})"><span class="opt-letter">${'ABCD'[i]}</span>${o}</button>`).join('');
+  document.getElementById('quizFeedback').className='quiz-feedback';
+  document.getElementById('btnNext').className='btn-next';
+  updateProgress();
+}
+
+function answerQ(btn,idx){
+  const q=questions[cur];
+  document.querySelectorAll('.quiz-opt').forEach(o=>o.classList.add('disabled'));
+  const fb=document.getElementById('quizFeedback');
+  if(idx===q.correct){
+    btn.classList.add('correct');
+    fb.textContent='✅ Richtig! '+q.fb;
+    fb.className='quiz-feedback show correct';
+    score++;answers.push(1);
+    document.getElementById('qd'+cur).className='quiz-dot done';
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');
+    fb.textContent='❌ Falsch. '+q.fb;
+    fb.className='quiz-feedback show wrong';
+    answers.push(0);
+    document.getElementById('qd'+cur).className='quiz-dot wrong-dot';
+  }
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function nextQuestion(){
+  cur++;
+  if(cur>=questions.length){showResult();}
+  else{document.getElementById('qd'+cur).className='quiz-dot active';showQ();}
+}
+
+function showResult(){
+  document.getElementById('quizMain').style.display='none';
+  document.getElementById('quizResult').classList.add('show');
+  const pct=Math.round(score/questions.length*100);
+  document.getElementById('resultScore').textContent=pct+'%';
+  document.getElementById('resultLabel').textContent=pct>=80?'✅ Bestanden! Du kennst die Sicherheitsregeln gut.':pct>=60?'⚠️ Knapp nicht bestanden. Nochmal wiederholen!':'❌ Nicht bestanden. Bitte Lektionen nochmal durcharbeiten.';
+  updateProgress(100);
+}
+
+function restartQuiz(){
+  cur=0;score=0;answers=[];
+  document.getElementById('quizMain').style.display='block';
+  document.getElementById('quizResult').classList.remove('show');
+  initQuiz();
+}
+
+function updateProgress(override){
+  let done=0;
+  [1,2,3].forEach(n=>{if(document.getElementById('body'+n).classList.contains('open'))done++;});
+  ['s1','s2','s3'].forEach(id=>{if(document.getElementById('fb-'+id).classList.contains('show'))done++;});
+  done+=answers.length;
+  const pct=override!==undefined?override:Math.min(95,Math.round(done/9*100));
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=pct+'%';
+}
+
+window.addEventListener('load',()=>{toggleCard(1);initQuiz();});
+</script>
+</body>
+</html>

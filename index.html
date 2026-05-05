@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DrohnenSchein.de — EU-Drohnenführerschein online. Einfach. Deutsch.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f5f0;
+      --yellow: #FFD600;
+      --yellow-dark: #E6C200;
+      --gray: #1a1a1a;
+      --gray-mid: #2a2a2a;
+      --text-muted: #888;
+      --text-faint: #555;
+      --green: #00C853;
+      --red: #FF3D00;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Outfit',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden;cursor:none}
+    .cursor{width:12px;height:12px;background:var(--yellow);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference}
+    .cursor-ring{width:36px;height:36px;border:1px solid rgba(255,214,0,0.4);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left 0.12s ease,top 0.12s ease}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,10,0.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,214,0,0.1)}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.05em;color:var(--white);text-decoration:none}
+    .logo span{color:var(--yellow)}
+    .nav-cta{background:var(--yellow);color:var(--black);padding:8px 20px;border-radius:4px;font-size:14px;font-weight:600;text-decoration:none;transition:background 0.2s}
+    .nav-cta:hover{background:var(--yellow-dark)}
+    .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:7rem 1.5rem 4rem;position:relative;overflow:hidden}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(255,214,0,0.06) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 80% 80%,rgba(255,214,0,0.03) 0%,transparent 60%)}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,214,0,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,214,0,0.03) 1px,transparent 1px);background-size:60px 60px}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--yellow);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;animation:fadeUp 0.6s ease both}
+    .hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--yellow)}
+    .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,14vw,140px);line-height:0.95;letter-spacing:0.02em;margin-bottom:1.5rem;animation:fadeUp 0.6s 0.1s ease both;position:relative;z-index:1}
+    .hero h1 .yellow{color:var(--yellow)}
+    .hero h1 .outline{-webkit-text-stroke:1px rgba(255,255,255,0.3);color:transparent}
+    .hero-sub{font-size:clamp(16px,3vw,20px);color:var(--text-muted);max-width:520px;line-height:1.7;margin-bottom:2.5rem;font-weight:300;animation:fadeUp 0.6s 0.2s ease both}
+    .hero-sub strong{color:var(--white);font-weight:500}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp 0.6s 0.3s ease both;margin-bottom:3rem}
+    .btn-hero{background:var(--yellow);color:var(--black);padding:14px 32px;border-radius:4px;font-size:16px;font-weight:700;text-decoration:none;display:inline-block;transition:all 0.2s;letter-spacing:0.02em}
+    .btn-hero:hover{background:var(--yellow-dark);transform:translateY(-2px)}
+    .btn-ghost{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.2);padding:14px 32px;border-radius:4px;font-size:16px;font-weight:400;text-decoration:none;display:inline-block;transition:all 0.2s}
+    .btn-ghost:hover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.05)}
+    .hero-stats{display:flex;gap:2rem;flex-wrap:wrap;animation:fadeUp 0.6s 0.4s ease both}
+    .stat{border-left:2px solid var(--yellow);padding-left:1rem}
+    .stat-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--yellow);line-height:1}
+    .stat-label{font-size:12px;color:var(--text-muted);margin-top:2px}
+    .trust-bar{background:var(--gray);padding:1.5rem;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05)}
+    .trust-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap}
+    .trust-label{font-size:11px;color:var(--text-faint);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap}
+    .trust-logos{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;justify-content:center}
+    .trust-badge{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);white-space:nowrap}
+    .trust-badge .icon{width:28px;height:28px;background:rgba(255,214,0,0.1);border:1px solid rgba(255,214,0,0.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px}
+    section{max-width:900px;margin:0 auto;padding:5rem 1.5rem}
+    .section-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--black);background:var(--yellow);padding:3px 10px;border-radius:2px;margin-bottom:1rem}
+    .section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,6vw,64px);line-height:1;letter-spacing:0.02em;margin-bottom:1rem}
+    .section-body{font-size:16px;color:var(--text-muted);line-height:1.7;max-width:560px;font-weight:300}
+    .quiz-wrap{background:var(--gray);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:2rem;margin-top:2.5rem}
+    .quiz-title{font-size:18px;font-weight:600;margin-bottom:0.5rem}
+    .quiz-sub{font-size:14px;color:var(--text-muted);margin-bottom:2rem}
+    .quiz-step{display:none}
+    .quiz-step.active{display:block}
+    .quiz-question{font-size:16px;font-weight:500;margin-bottom:1rem}
+    .quiz-options{display:flex;flex-direction:column;gap:8px}
+    .quiz-opt{background:var(--gray-mid);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px 16px;font-size:15px;cursor:pointer;transition:all 0.2s;text-align:left;color:var(--white);display:flex;align-items:center;gap:12px;width:100%;font-family:'Outfit',sans-serif}
+    .quiz-opt:hover{border-color:var(--yellow);background:rgba(255,214,0,0.05)}
+    .quiz-opt .opt-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0}
+    .quiz-progress{display:flex;gap:4px;margin-bottom:1.5rem}
+    .quiz-dot{height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s}
+    .quiz-dot.done{background:var(--yellow)}
+    .quiz-result{display:none;padding:1.5rem;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.2);border-radius:8px}
+    .quiz-result.show{display:block}
+    .result-tag{font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--yellow);text-transform:uppercase;margin-bottom:0.5rem}
+    .result-title{font-size:22px;font-weight:700;margin-bottom:0.5rem}
+    .result-desc{font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:1.5rem}
+    .result-price{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--yellow);line-height:1;margin-bottom:1rem}
+    .result-price span{font-size:16px;color:var(--text-muted);font-family:'Outfit',sans-serif;font-weight:300}
+    .btn-result{display:inline-block;background:var(--yellow);color:var(--black);padding:12px 28px;border-radius:4px;font-weight:700;font-size:15px;text-decoration:none;transition:all 0.2s}
+    .btn-result:hover{background:var(--yellow-dark)}
+    .germany-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;margin-top:2.5rem}
+    .germany-card{background:var(--black);padding:2rem;transition:background 0.2s}
+    .germany-card:hover{background:var(--gray)}
+    .germany-icon{font-size:28px;margin-bottom:1rem;display:block}
+    .germany-card h3{font-size:17px;font-weight:600;margin-bottom:0.5rem}
+    .germany-card p{font-size:14px;color:var(--text-muted);line-height:1.6}
+    .germany-card .highlight{color:var(--yellow);font-weight:600}
+    .map-section{background:var(--gray);border-radius:16px;padding:2.5rem;margin-top:2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+    .map-visual{position:relative;aspect-ratio:1;background:rgba(255,214,0,0.03);border:1px solid rgba(255,214,0,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .map-de{font-family:'Bebas Neue',sans-serif;font-size:80px;color:rgba(255,214,0,0.12);position:absolute}
+    .map-pins{position:absolute;inset:0}
+    .pin{position:absolute;width:8px;height:8px;background:var(--yellow);border-radius:50%;animation:pinPulse 2s infinite}
+    .pin::after{content:'';position:absolute;inset:-4px;border-radius:50%;background:rgba(255,214,0,0.2);animation:pinPulse 2s infinite}
+    @keyframes pinPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:0.6}}
+    .map-info h3{font-size:22px;font-weight:700;margin-bottom:1rem}
+    .map-info p{font-size:15px;color:var(--text-muted);line-height:1.7;margin-bottom:1rem}
+    .map-list{list-style:none}
+    .map-list li{display:flex;align-items:center;gap:10px;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .map-list li::before{content:'✓';color:var(--green);font-weight:700}
+    .courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:2.5rem}
+    .course-card{background:var(--gray);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:2rem;position:relative;overflow:hidden;transition:transform 0.2s,border-color 0.2s}
+    .course-card:hover{transform:translateY(-4px);border-color:rgba(255,214,0,0.3)}
+    .course-card.featured{border-color:var(--yellow)}
+    .featured-tag{position:absolute;top:0;right:0;background:var(--yellow);color:var(--black);font-size:11px;font-weight:700;padding:4px 12px;letter-spacing:0.05em}
+    .course-cat{font-size:11px;font-weight:600;letter-spacing:0.1em;color:var(--yellow);text-transform:uppercase;margin-bottom:0.75rem}
+    .course-title{font-size:22px;font-weight:700;margin-bottom:0.5rem}
+    .course-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.5rem}
+    .course-features{list-style:none;margin-bottom:1.5rem}
+    .course-features li{font-size:14px;color:rgba(255,255,255,0.7);padding:5px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .course-features li::before{content:'→';color:var(--yellow);font-size:12px}
+    .course-price{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--white);line-height:1;margin-bottom:1rem}
+    .course-price .eur{font-size:24px;color:var(--yellow)}
+    .course-price .old{font-size:16px;color:var(--text-faint);text-decoration:line-through;font-family:'Outfit',sans-serif;font-weight:300;margin-left:8px}
+    .btn-course{display:block;text-align:center;background:var(--yellow);color:var(--black);padding:12px;border-radius:4px;font-weight:700;font-size:15px;text-decoration:none;transition:all 0.2s;margin-bottom:8px}
+    .btn-course:hover{background:var(--yellow-dark)}
+    .btn-course-ghost{display:block;text-align:center;background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.2);padding:12px;border-radius:4px;font-size:15px;text-decoration:none;transition:all 0.2s}
+    .btn-course-ghost:hover{border-color:rgba(255,255,255,0.5)}
+    .reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:2.5rem}
+    .review-card{background:var(--gray);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.5rem}
+    .review-stars{color:var(--yellow);font-size:14px;margin-bottom:0.75rem;letter-spacing:2px}
+    .review-text{font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;margin-bottom:1rem}
+    .review-author{display:flex;align-items:center;gap:10px}
+    .review-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,214,0,0.15);border:1px solid rgba(255,214,0,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--yellow);flex-shrink:0}
+    .review-name{font-size:14px;font-weight:500}
+    .review-city{font-size:12px;color:var(--text-muted)}
+    .urgency{background:linear-gradient(135deg,rgba(255,61,0,0.1),rgba(255,61,0,0.05));border:1px solid rgba(255,61,0,0.2);border-radius:12px;padding:2.5rem;text-align:center;margin-top:2.5rem}
+    .urgency-num{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,12vw,100px);color:var(--red);line-height:1;margin-bottom:0.5rem}
+    .urgency h3{font-size:20px;font-weight:600;margin-bottom:0.75rem}
+    .urgency p{font-size:15px;color:var(--text-muted);max-width:480px;margin:0 auto 2rem}
+    footer{border-top:1px solid rgba(255,255,255,0.06);padding:3rem 1.5rem;max-width:900px;margin:0 auto}
+    .footer-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-bottom:2rem}
+    .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--white);text-decoration:none;display:block;margin-bottom:0.5rem}
+    .footer-logo span{color:var(--yellow)}
+    .footer-tagline{font-size:13px;color:var(--text-muted);line-height:1.6}
+    .footer-col h4{font-size:13px;font-weight:600;margin-bottom:1rem;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase}
+    .footer-col a{display:block;font-size:14px;color:rgba(255,255,255,0.6);text-decoration:none;margin-bottom:6px;transition:color 0.2s}
+    .footer-col a:hover{color:var(--yellow)}
+    .footer-bottom{border-top:1px solid rgba(255,255,255,0.05);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+    .footer-bottom p{font-size:12px;color:var(--text-faint)}
+    .footer-bottom a{color:var(--text-faint);text-decoration:none}
+    .footer-bottom a:hover{color:var(--yellow)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .reveal{opacity:0;transform:translateY(32px);transition:opacity 0.6s ease,transform 0.6s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    @media(max-width:768px){nav{padding:0.875rem 1.25rem}.hero{padding:6rem 1.25rem 3rem}section{padding:3.5rem 1.25rem}.map-section{grid-template-columns:1fr}.footer-top{grid-template-columns:1fr}}
+    @media(max-width:480px){.cursor,.cursor-ring{display:none}body{cursor:auto}}
+  </style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="#" class="logo">Drohnen<span>Schein</span>.de</a>
+  <a href="#kurse" class="nav-cta">Jetzt starten →</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">EU-Drohnenführerschein · 100% Online · Made in Germany</div>
+  <h1><span class="yellow">Flieg</span><br>legal.<br><span class="outline">Flieg</span><br>smart.</h1>
+  <p class="hero-sub">Ab 250g Drohne brauchst du den Führerschein — Punkt.<br><strong>Wir machen das einfach, schnell und auf Deutsch.</strong></p>
+  <div class="hero-actions">
+    <a href="#finder" class="btn-hero">Welchen Schein brauch ich? →</a>
+    <a href="#kurse" class="btn-ghost">Kurse ansehen</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">50.000€</div><div class="stat-label">Max. Bußgeld ohne Schein</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Erfolgsgarantie</div></div>
+    <div class="stat"><div class="stat-num">5 Jahre</div><div class="stat-label">Zertifikat gültig</div></div>
+  </div>
+</div>
+
+<div class="trust-bar">
+  <div class="trust-inner">
+    <span class="trust-label">Anerkannt von</span>
+    <div class="trust-logos">
+      <div class="trust-badge"><div class="icon">🇩🇪</div><span>Luftfahrtbundesamt</span></div>
+      <div class="trust-badge"><div class="icon">🇪🇺</div><span>EASA konform</span></div>
+      <div class="trust-badge"><div class="icon">✅</div><span>§ 21h LuftVO geprüft</span></div>
+      <div class="trust-badge"><div class="icon">🏛️</div><span>Alle Bundesländer</span></div>
+      <div class="trust-badge"><div class="icon">🔒</div><span>DSGVO-konform</span></div>
+    </div>
+  </div>
+</div>
+
+<section id="finder">
+  <div class="reveal">
+    <span class="section-tag">Schnellcheck</span>
+    <h2 class="section-title">Welchen Schein<br>brauchst du?</h2>
+    <p class="section-body">3 Fragen. 30 Sekunden. Die richtige Antwort.</p>
+  </div>
+  <div class="quiz-wrap reveal">
+    <div class="quiz-title">Dein persönlicher Führerschein-Finder</div>
+    <div class="quiz-sub">Beantworte 3 kurze Fragen — wir empfehlen dir den richtigen Kurs.</div>
+    <div class="quiz-progress">
+      <div class="quiz-dot done" id="dot0"></div>
+      <div class="quiz-dot" id="dot1"></div>
+      <div class="quiz-dot" id="dot2"></div>
+    </div>
+    <div class="quiz-step active" id="step0">
+      <div class="quiz-question">Wie schwer ist deine Drohne?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="nextStep(0,0)"><span class="opt-icon">🪶</span><div><strong>Unter 250 Gramm</strong><br><small style="color:var(--text-muted)">z.B. DJI Mini 3</small></div></button>
+        <button class="quiz-opt" onclick="nextStep(0,1)"><span class="opt-icon">🚁</span><div><strong>250g bis 4 kg</strong><br><small style="color:var(--text-muted)">z.B. DJI Air 3, Mavic</small></div></button>
+        <button class="quiz-opt" onclick="nextStep(0,2)"><span class="opt-icon">🏭</span><div><strong>Über 4 kg / Profi</strong><br><small style="color:var(--text-muted)">Gewerblich oder große Drohne</small></div></button>
+      </div>
+    </div>
+    <div class="quiz-step" id="step1">
+      <div class="quiz-question">Wofür nutzt du die Drohne?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="nextStep(1,0)"><span class="opt-icon">🎬</span><div><strong>Hobby & Fotografie</strong><br><small style="color:var(--text-muted)">Privat, Urlaub, Landschaft</small></div></button>
+        <button class="quiz-opt" onclick="nextStep(1,1)"><span class="opt-icon">💼</span><div><strong>Gewerblich</strong><br><small style="color:var(--text-muted)">Baustelle, Immobilien, Inspektion</small></div></button>
+      </div>
+    </div>
+    <div class="quiz-step" id="step2">
+      <div class="quiz-question">Wo fliegst du hauptsächlich?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="showResult('a1a3')"><span class="opt-icon">🌳</span><div><strong>Ländlich / Außerorts</strong><br><small style="color:var(--text-muted)">Felder, Wälder, wenig Menschen</small></div></button>
+        <button class="quiz-opt" onclick="showResult('a2')"><span class="opt-icon">🏙️</span><div><strong>Stadt / Wohngebiet</strong><br><small style="color:var(--text-muted)">In der Nähe von Menschen</small></div></button>
+      </div>
+    </div>
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-tag" id="result-tag"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-desc" id="result-desc"></div>
+      <div class="result-price" id="result-price"></div>
+      <a href="#kurse" class="btn-result">Jetzt Kurs buchen →</a>
+      <button style="background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;margin-left:1rem" onclick="resetQuiz()">Neu starten</button>
+    </div>
+  </div>
+</section>
+
+<div style="background:var(--gray);border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04)">
+<section>
+  <div class="reveal">
+    <span class="section-tag">Warum wir</span>
+    <h2 class="section-title">Deutsch.<br>Direkt. Fertig.</h2>
+    <p class="section-body">Andere Anbieter kommen aus den Niederlanden und übersetzen. Wir sind von Anfang an für Deutschland gebaut.</p>
+  </div>
+  <div class="germany-grid reveal">
+    <div class="germany-card"><span class="germany-icon">🇩🇪</span><h3>Deutsche Rechtslage</h3><p>§ 21h LuftVO, Luftfahrtbundesamt, alle 16 Bundesländer — wir erklären die <span class="highlight">deutschen Regeln auf Deutsch.</span></p></div>
+    <div class="germany-card"><span class="germany-icon">📱</span><h3>Mobile First</h3><p>Lern auf dem Sofa, in der Bahn, am Küchentisch. <span class="highlight">100% mobiloptimiert</span> — kein Laptop nötig.</p></div>
+    <div class="germany-card"><span class="germany-icon">⚡</span><h3>Schnell & klar</h3><p>Kein Juristendeutsch, kein Kurswirrwarr. <span class="highlight">Klare Lernpfade</span> — du weißt immer wo du stehst.</p></div>
+    <div class="germany-card"><span class="germany-icon">🔄</span><h3>Kostenlose Wiederholungen</h3><p>Prüfung nicht bestanden? <span class="highlight">Kein Problem und kein extra Cent.</span> Wir wiederholen bis du bestehst.</p></div>
+    <div class="germany-card"><span class="germany-icon">🏆</span><h3>100% Erfolgsgarantie</h3><p>Wenn du unseren Kurs machst und trotzdem nicht bestehst, <span class="highlight">erstatten wir den Kaufpreis.</span></p></div>
+    <div class="germany-card"><span class="germany-icon">🛡️</span><h3>DSGVO & Datenschutz</h3><p>Server in Deutschland. Keine US-Cloud. <span class="highlight">Deine Daten bleiben hier.</span></p></div>
+  </div>
+  <div class="map-section reveal">
+    <div class="map-visual">
+      <div class="map-de">DE</div>
+      <div class="map-pins">
+        <div class="pin" style="top:30%;left:45%"></div>
+        <div class="pin" style="top:20%;left:60%;animation-delay:0.3s"></div>
+        <div class="pin" style="top:55%;left:35%;animation-delay:0.6s"></div>
+        <div class="pin" style="top:65%;left:55%;animation-delay:0.9s"></div>
+        <div class="pin" style="top:40%;left:70%;animation-delay:1.2s"></div>
+        <div class="pin" style="top:75%;left:40%;animation-delay:0.4s"></div>
+      </div>
+    </div>
+    <div class="map-info">
+      <h3>Gültig in ganz Deutschland — und der EU</h3>
+      <p>Dein Zertifikat ist offiziell anerkannt in allen EU-Mitgliedstaaten, plus Norwegen, Island und der Schweiz.</p>
+      <ul class="map-list">
+        <li>Alle 16 deutschen Bundesländer</li>
+        <li>27 EU-Mitgliedstaaten</li>
+        <li>Norwegen, Island & Schweiz</li>
+        <li>5 Jahre gültig ab Ausstellung</li>
+        <li>Sofort-Download nach Prüfung</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</div>
+
+<section id="kurse">
+  <div class="reveal">
+    <span class="section-tag">Kurse</span>
+    <h2 class="section-title">Dein Kurs.<br>Dein Preis.</h2>
+    <p class="section-body">Kein Abo, kein Kleingedrucktes. Du zahlst einmal und fliegst für 5 Jahre legal.</p>
+  </div>
+  <div class="courses-grid reveal">
+    <div class="course-card">
+      <div class="course-cat">A1 + A3 Zertifikat</div>
+      <div class="course-title">Kleiner Drohnenschein</div>
+      <div class="course-sub">Für Einsteiger & leichte Drohnen ab 250g</div>
+      <ul class="course-features">
+        <li>Online-Kurs auf Deutsch</li>
+        <li>Unbegrenzte Wiederholungen</li>
+        <li>Prüfung beim LBA</li>
+        <li>Zertifikat-Download</li>
+      </ul>
+      <div class="course-price"><span class="eur">€</span>79<span class="old">99€</span></div>
+      <a href="#" class="btn-course">Jetzt buchen</a>
+      <a href="modul1.html" target="_blank" class="btn-course-ghost">Demo ansehen →</a>
+    </div>
+    <div class="course-card featured">
+      <div class="featured-tag">BELIEBT</div>
+      <div class="course-cat">A1-A3 + A2 Zertifikat</div>
+      <div class="course-title">Großer Drohnenschein</div>
+      <div class="course-sub">Für alle, die überall fliegen wollen</div>
+      <ul class="course-features">
+        <li>Beide Zertifikate im Paket</li>
+        <li>Wohngebiete & Industrie</li>
+        <li>C2-Label Drohnen inklusive</li>
+        <li>Praxis-Lernvideos</li>
+        <li>Unbegrenzte Wiederholungen</li>
+      </ul>
+      <div class="course-price"><span class="eur">€</span>149<span class="old">199€</span></div>
+      <a href="#" class="btn-course">Jetzt buchen</a>
+      <a href="modul1.html" target="_blank" class="btn-course-ghost">Demo ansehen →</a>
+    </div>
+    <div class="course-card">
+      <div class="course-cat">Nur A2 Zertifikat</div>
+      <div class="course-title">A2 Aufstieg</div>
+      <div class="course-sub">Du hast A1/A3 bereits — mach den Aufstieg</div>
+      <ul class="course-features">
+        <li>Nur das A2 Zertifikat</li>
+        <li>Fliegen in Wohngebieten</li>
+        <li>Für bestehende Piloten</li>
+        <li>Schnellkurs ca. 4 Stunden</li>
+      </ul>
+      <div class="course-price"><span class="eur">€</span>69<span class="old">99€</span></div>
+      <a href="#" class="btn-course">Jetzt buchen</a>
+      <a href="modul1.html" target="_blank" class="btn-course-ghost">Demo ansehen →</a>
+    </div>
+  </div>
+</section>
+
+<div style="background:var(--gray);border-top:1px solid rgba(255,255,255,0.04)">
+<section>
+  <div class="reveal">
+    <span class="section-tag">Bewertungen</span>
+    <h2 class="section-title">Was unsere<br>Piloten sagen.</h2>
+  </div>
+  <div class="reviews-grid reveal">
+    <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Endlich mal ein Anbieter der wirklich auf Deutsch erklärt — nicht nur übersetzt. Die Rechtslage für Bayern war super klar dargestellt."</div><div class="review-author"><div class="review-avatar">MK</div><div><div class="review-name">Markus K.</div><div class="review-city">München, Bayern</div></div></div></div>
+    <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Hab alles auf dem Handy gemacht, unterwegs in der Bahn. Prüfung beim LBA direkt danach bestanden. Klare Empfehlung!"</div><div class="review-author"><div class="review-avatar">SB</div><div><div class="review-name">Sarah B.</div><div class="review-city">Hamburg</div></div></div></div>
+    <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Beim ersten Versuch nicht bestanden — kostenlose Wiederholung gemacht und beim zweiten Mal problemlos durch. Danke!"</div><div class="review-author"><div class="review-avatar">TN</div><div><div class="review-name">Thomas N.</div><div class="review-city">Berlin</div></div></div></div>
+    <div class="review-card"><div class="review-stars">★★★★★</div><div class="review-text">"Als Immobilienmakler brauche ich das A2. Hab das Kombi-Paket genommen und in einer Woche beide Scheine gemacht. Top!"</div><div class="review-author"><div class="review-avatar">JH</div><div><div class="review-name">Jana H.</div><div class="review-city">Frankfurt am Main</div></div></div></div>
+  </div>
+</section>
+</div>
+
+<section>
+  <div class="urgency reveal">
+    <div class="urgency-num">50.000 €</div>
+    <h3>Das kostet illegales Fliegen</h3>
+    <p>Seit dem 31. Dezember 2020 ist der EU-Drohnenführerschein für Drohnen ab 250g Pflicht. Das Bußgeld kann bis zu 50.000 Euro betragen.</p>
+    <a href="#kurse" class="btn-hero">Jetzt legal fliegen →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div>
+      <a href="#" class="footer-logo">Drohnen<span>Schein</span>.de</a>
+      <p class="footer-tagline">Der EU-Drohnenführerschein.<br>Einfach. Deutsch. Fertig.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Kurse</h4>
+      <a href="#">Kleiner Drohnenschein (A1/A3)</a>
+      <a href="#">Großer Drohnenschein (Kombi)</a>
+      <a href="#">A2 Aufstieg</a>
+      <a href="#">Zertifikat verlängern</a>
+    </div>
+    <div class="footer-col">
+      <h4>Info</h4>
+      <a href="#">Was ist der EU-Führerschein?</a>
+      <a href="#">Deutsche Luftfahrtgesetze</a>
+      <a href="#">FAQ</a>
+      <a href="#">Kontakt</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 DrohnenSchein.de · <a href="#">Impressum</a> · <a href="#">Datenschutz</a> · <a href="#">AGB</a></p>
+    <p style="color:var(--yellow);font-size:12px">🇩🇪 Server in Deutschland · DSGVO-konform</p>
+  </div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursorRing');
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+let rx=0,ry=0;
+function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)}
+animRing();
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+let answers=[];
+function nextStep(current,answer){
+  answers[current]=answer;
+  document.getElementById('step'+current).classList.remove('active');
+  document.getElementById('dot'+current).classList.add('done');
+  const next=current+1;
+  const nextEl=document.getElementById('step'+next);
+  if(nextEl){nextEl.classList.add('active');const nd=document.getElementById('dot'+next);if(nd)nd.classList.add('done');}
+}
+function showResult(type){
+  document.querySelectorAll('.quiz-step').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.quiz-dot').forEach(d=>d.classList.add('done'));
+  const data={
+    'a1a3':['A1 + A3 Zertifikat','Kleiner Drohnenschein','Perfekt für Einsteiger und leichte Drohnen. Du lernst die Grundregeln und fliegst legal in ganz Deutschland.','€79'],
+    'a2':['A1-A3 + A2 Kombi','Großer Drohnenschein','Du willst auch in Wohngebieten fliegen. Das Kombi-Paket gibt dir maximale Freiheit überall in Deutschland.','€149'],
+  };
+  const d=data[type]||data['a1a3'];
+  document.getElementById('result-tag').textContent=d[0];
+  document.getElementById('result-title').textContent=d[1];
+  document.getElementById('result-desc').textContent=d[2];
+  document.getElementById('result-price').innerHTML=d[3]+'<span> einmalig · inkl. MwSt.</span>';
+  document.getElementById('quiz-result').classList.add('show');
+}
+function resetQuiz(){
+  answers=[];
+  document.querySelectorAll('.quiz-step').forEach((s,i)=>{s.classList.remove('active');if(i===0)s.classList.add('active')});
+  document.querySelectorAll('.quiz-dot').forEach((d,i)=>{d.classList.remove('done');if(i===0)d.classList.add('done')});
+  document.getElementById('quiz-result').classList.remove('show');
+}
+</script>
+</body>
+</html>
